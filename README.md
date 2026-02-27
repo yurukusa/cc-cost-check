@@ -34,6 +34,7 @@ Generate a shareable summary with your cost breakdown. Post to X/Twitter or copy
 | [cc-audit-log](https://github.com/yurukusa/cc-audit-log) | Human-readable audit trail |
 | **cc-cost-check** | Cost per commit calculator |
 | [cc-wrapped](https://yurukusa.github.io/cc-wrapped/) | Your AI year in review (Spotify Wrapped style) |
+| [cc-roast](https://yurukusa.github.io/cc-roast/) | Your CLAUDE.md, brutally honest |
 
 ## Privacy
 
