@@ -33,6 +33,7 @@ Generate a shareable summary with your cost breakdown. Post to X/Twitter or copy
 | [cc-session-stats](https://github.com/yurukusa/cc-session-stats) | Usage analytics from session data |
 | [cc-audit-log](https://github.com/yurukusa/cc-audit-log) | Human-readable audit trail |
 | **cc-cost-check** | Cost per commit calculator |
+| [cc-wrapped](https://yurukusa.github.io/cc-wrapped/) | Your AI year in review (Spotify Wrapped style) |
 
 ## Privacy
 
