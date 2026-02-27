@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code Cost Check — Know What Your AI Costs Per Commit</title>
+  <meta name="description" content="Calculate your real Claude Code cost per hour, per commit, and per day. Paste your session data or enter estimates. Compare vs hiring a developer." />
+  <meta property="og:title" content="Claude Code Cost Check — Cost Per Commit Calculator" />
+  <meta property="og:description" content="How much does your AI cost per commit? Per hour? Compare with hiring a developer. Free calculator." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0f1419;
+      --bg-surface:  #1a2332;
+      --bg-card:     #1e2d3d;
+      --bg-hover:    #253545;
+      --accent:      #10b981;
+      --accent-dark: #059669;
+      --accent-glow: rgba(16, 185, 129, 0.15);
+      --text:        #e7e9ea;
+      --text-muted:  #71767b;
+      --border:      rgba(255,255,255,.08);
+      --gold:        #fbbf24;
+      --red:         #ef4444;
+      --blue:        #3b82f6;
+      --radius:      12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--bg-surface) 0%, #0d1b2a 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 48px 20px 36px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 50%, var(--accent-glow) 0%, transparent 50%);
+      animation: pulse 8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      position: relative;
+    }
+    header h1 span { color: var(--accent); }
+    header p {
+      color: var(--text-muted);
+      margin-top: 8px;
+      font-size: 1rem;
+      position: relative;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-surface);
+      border-radius: var(--radius);
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+    .tab {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab:hover { color: var(--text); background: var(--bg-hover); }
+    .tab.active { background: var(--accent); color: #fff; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+
+    /* Form elements */
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    input[type="number"], select, textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      font-family: inherit;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    input[type="number"]:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    textarea {
+      min-height: 120px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      resize: vertical;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 480px) {
+      .input-row { grid-template-columns: 1fr; }
+    }
+
+    .plan-selector {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 480px) {
+      .plan-selector { grid-template-columns: repeat(2, 1fr); }
+    }
+    .plan-btn {
+      padding: 12px 8px;
+      background: var(--bg-surface);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .plan-btn:hover { border-color: var(--accent); }
+    .plan-btn.active { border-color: var(--accent); background: var(--accent-glow); }
+    .plan-btn .price { font-size: 1.2rem; display: block; margin-top: 4px; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
+
+    /* Results */
+    #results { display: none; }
+    #results.visible { display: block; }
+
+    .results-hero {
+      text-align: center;
+      padding: 32px 24px;
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-surface) 100%);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+    }
+    .cost-per-commit {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      font-weight: 900;
+      color: var(--accent);
+      letter-spacing: -0.03em;
+    }
+    .cost-label {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 600px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+    }
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .metric-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Comparison bars */
+    .comparison { margin-bottom: 24px; }
+    .comparison h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+    .compare-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+    .compare-label {
+      font-size: 0.85rem;
+      min-width: 140px;
+      color: var(--text-muted);
+    }
+    .compare-bar-wrap {
+      flex: 1;
+      height: 28px;
+      background: var(--bg-surface);
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+    }
+    .compare-bar {
+      height: 100%;
+      border-radius: 14px;
+      transition: width 0.8s ease-out;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    /* Verdict */
+    .verdict-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .verdict-card h3 { color: var(--accent); margin-bottom: 12px; }
+    .verdict-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+    .verdict-detail { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
+
+    /* Share */
+    .share-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .share-section h3 { color: var(--accent); margin-bottom: 12px; }
+    .share-text {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+    .share-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .share-btn {
+      padding: 10px 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-surface);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .share-btn:hover { border-color: var(--accent); background: var(--bg-hover); }
+    .share-btn.twitter { background: #1d9bf0; color: #fff; border-color: #1d9bf0; }
+    .share-btn.twitter:hover { background: #1a8cd8; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    .toolkit-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    /* Insight pill */
+    .insight {
+      display: inline-block;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
+    .note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><span>$</span> cc-cost-check</h1>
+  <p>Know what your AI costs per commit, per hour, per day.</p>
+</header>
+
+<div class="container">
+
+  <!-- Input tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="manual">Manual Input</button>
+    <button class="tab" data-tab="json">Paste Session Data</button>
+  </div>
+
+  <!-- Manual input -->
+  <div id="panel-manual" class="tab-panel active">
+    <div class="card">
+      <h3>Your Plan</h3>
+      <label>Monthly cost (USD)</label>
+      <div class="plan-selector">
+        <button class="plan-btn" data-cost="20">Pro<span class="price">$20</span></button>
+        <button class="plan-btn" data-cost="100">Max 5x<span class="price">$100</span></button>
+        <button class="plan-btn active" data-cost="200">Max 20x<span class="price">$200</span></button>
+        <button class="plan-btn" data-cost="0">Custom<span class="price">$?</span></button>
+      </div>
+      <input type="number" id="customCost" placeholder="Enter monthly cost" style="display:none" />
+    </div>
+
+    <div class="card">
+      <h3>Your Usage</h3>
+      <div class="input-row">
+        <div>
+          <label>Hours per week using Claude Code</label>
+          <input type="number" id="hoursWeek" value="20" min="1" max="168" />
+        </div>
+        <div>
+          <label>Commits per week</label>
+          <input type="number" id="commitsWeek" value="30" min="0" max="500" />
+        </div>
+      </div>
+      <div class="input-row">
+        <div>
+          <label>Active days per week</label>
+          <input type="number" id="daysWeek" value="5" min="1" max="7" />
+        </div>
+        <div>
+          <label>Sessions per week</label>
+          <input type="number" id="sessionsWeek" value="10" min="1" max="200" />
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="calculate()">Calculate My AI Costs</button>
+  </div>
+
+  <!-- JSON paste -->
+  <div id="panel-json" class="tab-panel">
+    <div class="card">
+      <h3>Paste cc-session-stats --json Output</h3>
+      <p class="note" style="margin-bottom:12px">Run <code style="color:var(--accent)">npx cc-session-stats --json</code> and paste the result below.</p>
+      <textarea id="jsonInput" placeholder='{"totalSessions": 3400, "totalHours": 102, ...}'></textarea>
+      <div class="input-row">
+        <div>
+          <label>Monthly cost (USD)</label>
+          <input type="number" id="jsonCost" value="200" min="1" />
+        </div>
+        <div>
+          <label>Commits per week (estimate)</label>
+          <input type="number" id="jsonCommits" value="30" min="0" />
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="calculateFromJson()">Calculate From Real Data</button>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+    <div class="results-hero">
+      <div class="cost-per-commit" id="cpcValue">$0.00</div>
+      <div class="cost-label">cost per commit</div>
+      <div class="insight" id="cpcInsight"></div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value" id="costHour">—</div>
+        <div class="metric-label">per hour</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="costDay">—</div>
+        <div class="metric-label">per active day</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="costSession">—</div>
+        <div class="metric-label">per session</div>
+      </div>
+    </div>
+
+    <div class="card comparison">
+      <h3>vs. Alternatives (Monthly Cost for Same Output)</h3>
+      <div id="compareBars"></div>
+    </div>
+
+    <div class="verdict-card">
+      <h3>Verdict</h3>
+      <div class="verdict-text" id="verdictText"></div>
+      <div class="verdict-detail" id="verdictDetail"></div>
+    </div>
+
+    <div class="share-section">
+      <h3>Share Your Results</h3>
+      <div class="share-text" id="sharePreview"></div>
+      <div class="share-buttons">
+        <button class="share-btn twitter" onclick="shareTwitter()">Share on X</button>
+        <button class="share-btn" onclick="copyShare()">Copy Text</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>Part of the <strong>cc-toolkit</strong> — open-source tools for Claude Code operators.</p>
+  <div class="toolkit-links">
+    <a href="https://github.com/yurukusa/cc-health-check">cc-health-check</a>
+    <a href="https://github.com/yurukusa/cc-session-stats">cc-session-stats</a>
+    <a href="https://github.com/yurukusa/cc-audit-log">cc-audit-log</a>
+    <a href="https://yurukusa.github.io/">yurukusa.github.io</a>
+  </div>
+  <p style="margin-top:12px">Zero tracking. Runs entirely in your browser.</p>
+</footer>
+
+<script>
+// --- Tab switching ---
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// --- Plan selection ---
+let selectedCost = 200;
+document.querySelectorAll('.plan-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.plan-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const cost = parseInt(btn.dataset.cost);
+    const customInput = document.getElementById('customCost');
+    if (cost === 0) {
+      customInput.style.display = 'block';
+      customInput.focus();
+      selectedCost = parseInt(customInput.value) || 0;
+    } else {
+      customInput.style.display = 'none';
+      selectedCost = cost;
+    }
+  });
+});
+document.getElementById('customCost').addEventListener('input', function() {
+  selectedCost = parseInt(this.value) || 0;
+});
+
+// --- Core calculation ---
+function doCalculation(monthlyCost, hoursPerWeek, commitsPerWeek, daysPerWeek, sessionsPerWeek) {
+  const weeksPerMonth = 4.33;
+  const monthlyHours = hoursPerWeek * weeksPerMonth;
+  const monthlyCommits = commitsPerWeek * weeksPerMonth;
+  const monthlyDays = daysPerWeek * weeksPerMonth;
+  const monthlySessions = sessionsPerWeek * weeksPerMonth;
+
+  const costPerHour = monthlyCost / monthlyHours;
+  const costPerCommit = monthlyCommits > 0 ? monthlyCost / monthlyCommits : 0;
+  const costPerDay = monthlyCost / monthlyDays;
+  const costPerSession = monthlyCost / monthlySessions;
+
+  // Comparisons (rough industry rates)
+  const juniorDevHourly = 35; // USD avg
+  const seniorDevHourly = 75;
+  const copilotMonthly = 19;  // GitHub Copilot Individual
+  const chatgptMonthly = 20;  // ChatGPT Plus
+  const cursorMonthly = 20;   // Cursor Pro
+
+  // Estimate: how much would a junior dev cost for the same hours?
+  const juniorEquiv = monthlyHours * juniorDevHourly;
+  const seniorEquiv = monthlyHours * seniorDevHourly;
+
+  return {
+    monthlyCost,
+    monthlyHours,
+    monthlyCommits,
+    monthlyDays,
+    monthlySessions,
+    costPerHour,
+    costPerCommit,
+    costPerDay,
+    costPerSession,
+    hoursPerWeek,
+    commitsPerWeek,
+    comparisons: [
+      { label: 'Claude Code (you)', cost: monthlyCost, color: 'var(--accent)' },
+      { label: 'GitHub Copilot', cost: copilotMonthly, color: 'var(--blue)' },
+      { label: 'ChatGPT Plus', cost: chatgptMonthly, color: 'var(--blue)' },
+      { label: 'Cursor Pro', cost: cursorMonthly, color: 'var(--blue)' },
+      { label: 'Junior Dev (same hrs)', cost: juniorEquiv, color: 'var(--gold)' },
+      { label: 'Senior Dev (same hrs)', cost: seniorEquiv, color: 'var(--red)' },
+    ]
+  };
+}
+
+function renderResults(data) {
+  // Hero
+  document.getElementById('cpcValue').textContent = '$' + data.costPerCommit.toFixed(2);
+
+  // Insight
+  const insight = document.getElementById('cpcInsight');
+  if (data.costPerCommit < 0.5) {
+    insight.textContent = 'Cheaper than a cup of coffee per commit';
+  } else if (data.costPerCommit < 2) {
+    insight.textContent = 'About the cost of a vending machine drink';
+  } else if (data.costPerCommit < 5) {
+    insight.textContent = 'A latte per commit';
+  } else if (data.costPerCommit < 15) {
+    insight.textContent = 'A meal per commit';
+  } else {
+    insight.textContent = 'Consider increasing commit frequency';
+  }
+
+  // Metrics
+  document.getElementById('costHour').textContent = '$' + data.costPerHour.toFixed(2);
+  document.getElementById('costDay').textContent = '$' + data.costPerDay.toFixed(2);
+  document.getElementById('costSession').textContent = '$' + data.costPerSession.toFixed(2);
+
+  // Comparison bars
+  const maxCost = Math.max(...data.comparisons.map(c => c.cost));
+  const barsHtml = data.comparisons.map(c => {
+    const pct = Math.min((c.cost / maxCost) * 100, 100);
+    const displayCost = c.cost >= 1000 ? '$' + (c.cost / 1000).toFixed(1) + 'k' : '$' + c.cost.toFixed(0);
+    return `
+      <div class="compare-row">
+        <div class="compare-label">${c.label}</div>
+        <div class="compare-bar-wrap">
+          <div class="compare-bar" style="width:${pct}%;background:${c.color}">${displayCost}/mo</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('compareBars').innerHTML = barsHtml;
+
+  // Verdict
+  const ratio = data.comparisons[4].cost / data.monthlyCost; // junior dev ratio
+  const verdictEl = document.getElementById('verdictText');
+  const detailEl = document.getElementById('verdictDetail');
+
+  if (ratio > 20) {
+    verdictEl.textContent = 'Extraordinary value.';
+    detailEl.textContent = `A junior developer doing the same ${data.monthlyHours.toFixed(0)} hours would cost ${ratio.toFixed(0)}x more. You're getting developer-level output at a fraction of the cost.`;
+  } else if (ratio > 10) {
+    verdictEl.textContent = 'Excellent value.';
+    detailEl.textContent = `At $${data.costPerHour.toFixed(2)}/hour, you're paying roughly ${ratio.toFixed(0)}x less than a junior developer. Every commit costs you $${data.costPerCommit.toFixed(2)}.`;
+  } else if (ratio > 5) {
+    verdictEl.textContent = 'Strong value.';
+    detailEl.textContent = `Your AI costs $${data.costPerHour.toFixed(2)}/hour vs $35/hour for a junior dev (${ratio.toFixed(0)}x less). The more you use it, the better the ROI.`;
+  } else if (ratio > 2) {
+    verdictEl.textContent = 'Good value, with room to optimize.';
+    detailEl.textContent = `You're using ${data.hoursPerWeek} hours/week. Increasing usage would drive down your cost per hour (currently $${data.costPerHour.toFixed(2)}).`;
+  } else {
+    verdictEl.textContent = 'Consider increasing usage.';
+    detailEl.textContent = `At ${data.hoursPerWeek} hours/week, your cost per hour is $${data.costPerHour.toFixed(2)}. For maximum ROI, aim for 20+ hours/week of active use.`;
+  }
+
+  // Share text
+  const shareText = [
+    `My Claude Code costs:`,
+    `$${data.costPerCommit.toFixed(2)}/commit | $${data.costPerHour.toFixed(2)}/hour | $${data.costPerDay.toFixed(2)}/day`,
+    `${data.monthlyHours.toFixed(0)} hours/month on $${data.monthlyCost}/month plan`,
+    `Junior dev equivalent: $${data.comparisons[4].cost.toFixed(0)}/month (${ratio.toFixed(0)}x more)`,
+    ``,
+    `Check yours: https://yurukusa.github.io/cc-cost-check/`,
+  ].join('\n');
+  document.getElementById('sharePreview').textContent = shareText;
+
+  // Show results
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// --- Manual calculation ---
+function calculate() {
+  const hours = parseFloat(document.getElementById('hoursWeek').value) || 20;
+  const commits = parseFloat(document.getElementById('commitsWeek').value) || 30;
+  const days = parseFloat(document.getElementById('daysWeek').value) || 5;
+  const sessions = parseFloat(document.getElementById('sessionsWeek').value) || 10;
+
+  const data = doCalculation(selectedCost, hours, commits, days, sessions);
+  renderResults(data);
+}
+
+// --- JSON calculation ---
+function calculateFromJson() {
+  const raw = document.getElementById('jsonInput').value.trim();
+  const cost = parseFloat(document.getElementById('jsonCost').value) || 200;
+  const commitsWeek = parseFloat(document.getElementById('jsonCommits').value) || 30;
+
+  if (!raw) {
+    alert('Please paste your cc-session-stats --json output.');
+    return;
+  }
+
+  let json;
+  try {
+    json = JSON.parse(raw);
+  } catch (e) {
+    alert('Invalid JSON. Make sure you pasted the full output of cc-session-stats --json.');
+    return;
+  }
+
+  // Extract from cc-session-stats JSON format
+  const totalHours = json.totalHours || 0;
+  const totalDaysSpan = json.totalDaysSpan || 30;
+  const activeDays = json.activeDays || 1;
+  const totalSessions = json.totalSessions || 1;
+
+  // Calculate weekly averages from total data
+  const weeks = totalDaysSpan / 7;
+  const hoursPerWeek = totalHours / weeks;
+  const daysPerWeek = (activeDays / totalDaysSpan) * 7;
+  const sessionsPerWeek = totalSessions / weeks;
+
+  const data = doCalculation(cost, hoursPerWeek, commitsWeek, daysPerWeek, sessionsPerWeek);
+  renderResults(data);
+}
+
+// --- Share ---
+function shareTwitter() {
+  const text = document.getElementById('sharePreview').textContent;
+  const tweetText = text.split('\n').slice(0, 3).join('\n') + '\n\nhttps://yurukusa.github.io/cc-cost-check/';
+  window.open('https://x.com/intent/tweet?text=' + encodeURIComponent(tweetText), '_blank');
+}
+
+function copyShare() {
+  const text = document.getElementById('sharePreview').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
