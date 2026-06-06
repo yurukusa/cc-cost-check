@@ -386,120 +386,124 @@
 </head>
 <body>
 
-<header>
+<header style="position:relative;">
+  <button id="lang-btn" onclick="toggleLang()" style="position:absolute;top:0;right:0;background:transparent;border:1px solid #444;color:#aaa;border-radius:6px;padding:5px 13px;cursor:pointer;font-size:0.85rem;">日本語</button>
   <h1><span>$</span> cc-cost-check</h1>
-  <p>Know what your AI costs per commit, per hour, per day.</p>
+  <p data-i18n="tagline">Know what your AI costs per commit, per hour, per day.</p>
 </header>
 
 <div class="container">
 
   <!-- Input tabs -->
   <div class="tabs">
-    <button class="tab active" data-tab="manual">Manual Input</button>
-    <button class="tab" data-tab="json">Paste Session Data</button>
+    <button class="tab active" data-tab="manual" data-i18n="tabManual">Manual Input</button>
+    <button class="tab" data-tab="json" data-i18n="tabJson">Paste Session Data</button>
   </div>
 
   <!-- Manual input -->
   <div id="panel-manual" class="tab-panel active">
     <div class="card">
-      <h3>Your Plan</h3>
-      <label>Monthly cost (USD)</label>
+      <h3 data-i18n="yourPlan">Your Plan</h3>
+      <label data-i18n="monthlyCost">Monthly cost (USD)</label>
       <div class="plan-selector">
         <button class="plan-btn" data-cost="20">Pro<span class="price">$20</span></button>
         <button class="plan-btn" data-cost="100">Max 5x<span class="price">$100</span></button>
         <button class="plan-btn active" data-cost="200">Max 20x<span class="price">$200</span></button>
-        <button class="plan-btn" data-cost="0">Custom<span class="price">$?</span></button>
+        <button class="plan-btn" data-cost="0"><span data-i18n="custom">Custom</span><span class="price">$?</span></button>
       </div>
-      <input type="number" id="customCost" placeholder="Enter monthly cost" style="display:none" />
+      <input type="number" id="customCost" data-i18n-ph="enterCost" placeholder="Enter monthly cost" style="display:none" />
     </div>
 
     <div class="card">
-      <h3>Your Usage</h3>
+      <h3 data-i18n="yourUsage">Your Usage</h3>
       <div class="input-row">
         <div>
-          <label>Hours per week using Claude Code</label>
+          <label data-i18n="hoursWeek">Hours per week using Claude Code</label>
           <input type="number" id="hoursWeek" value="20" min="1" max="168" />
         </div>
         <div>
-          <label>Commits per week</label>
+          <label data-i18n="commitsWeek">Commits per week</label>
           <input type="number" id="commitsWeek" value="30" min="0" max="500" />
         </div>
       </div>
       <div class="input-row">
         <div>
-          <label>Active days per week</label>
+          <label data-i18n="daysWeek">Active days per week</label>
           <input type="number" id="daysWeek" value="5" min="1" max="7" />
         </div>
         <div>
-          <label>Sessions per week</label>
+          <label data-i18n="sessionsWeek">Sessions per week</label>
           <input type="number" id="sessionsWeek" value="10" min="1" max="200" />
         </div>
       </div>
     </div>
 
-    <button class="btn-primary" onclick="calculate()">Calculate My AI Costs</button>
+    <button class="btn-primary" onclick="calculate()" data-i18n="calcBtn">Calculate My AI Costs</button>
   </div>
 
   <!-- JSON paste -->
   <div id="panel-json" class="tab-panel">
     <div class="card">
-      <h3>Paste cc-session-stats --json Output</h3>
-      <p class="note" style="margin-bottom:12px">Run <code style="color:var(--accent)">npx cc-session-stats --json</code> and paste the result below.</p>
+      <h3 data-i18n="jsonHeading">Paste cc-session-stats --json Output</h3>
+      <p class="note" style="margin-bottom:12px" data-i18n-html="jsonNote">Run <code style="color:var(--accent)">npx cc-session-stats --json</code> and paste the result below.</p>
       <textarea id="jsonInput" placeholder='{"totalSessions": 3400, "totalHours": 102, ...}'></textarea>
       <div class="input-row">
         <div>
-          <label>Monthly cost (USD)</label>
+          <label data-i18n="monthlyCost">Monthly cost (USD)</label>
           <input type="number" id="jsonCost" value="200" min="1" />
         </div>
         <div>
-          <label>Commits per week (estimate)</label>
+          <label data-i18n="jsonCommits">Commits per week (estimate)</label>
           <input type="number" id="jsonCommits" value="30" min="0" />
         </div>
       </div>
     </div>
-    <button class="btn-primary" onclick="calculateFromJson()">Calculate From Real Data</button>
+    <button class="btn-primary" onclick="calculateFromJson()" data-i18n="calcJsonBtn">Calculate From Real Data</button>
   </div>
 
   <!-- Results -->
   <div id="results">
     <div class="results-hero">
       <div class="cost-per-commit" id="cpcValue">$0.00</div>
-      <div class="cost-label">cost per commit</div>
+      <div class="cost-label" data-i18n="cpc">cost per commit</div>
       <div class="insight" id="cpcInsight"></div>
     </div>
 
     <div class="metrics-grid">
       <div class="metric-card">
         <div class="metric-value" id="costHour">—</div>
-        <div class="metric-label">per hour</div>
+        <div class="metric-label" data-i18n="perHour">per hour</div>
       </div>
       <div class="metric-card">
         <div class="metric-value" id="costDay">—</div>
-        <div class="metric-label">per active day</div>
+        <div class="metric-label" data-i18n="perDay">per active day</div>
       </div>
       <div class="metric-card">
         <div class="metric-value" id="costSession">—</div>
-        <div class="metric-label">per session</div>
+        <div class="metric-label" data-i18n="perSession">per session</div>
       </div>
     </div>
 
     <div class="card comparison">
-      <h3>vs. Alternatives (Monthly Cost for Same Output)</h3>
+      <h3 data-i18n="vsAlt">vs. Alternatives (Monthly Cost for Same Output)</h3>
       <div id="compareBars"></div>
     </div>
 
     <div class="verdict-card">
-      <h3>Verdict</h3>
+      <h3 data-i18n="verdict">Verdict</h3>
       <div class="verdict-text" id="verdictText"></div>
       <div class="verdict-detail" id="verdictDetail"></div>
     </div>
 
+    <!-- Token Book funnel -->
+    <div id="tokenFunnel"></div>
+
     <div class="share-section">
-      <h3>Share Your Results</h3>
+      <h3 data-i18n="shareHeading">Share Your Results</h3>
       <div class="share-text" id="sharePreview"></div>
       <div class="share-buttons">
-        <button class="share-btn twitter" onclick="shareTwitter()">Share on X</button>
-        <button class="share-btn" onclick="copyShare()">Copy Text</button>
+        <button class="share-btn twitter" onclick="shareTwitter()" data-i18n="shareX">Share on X</button>
+        <button class="share-btn" onclick="copyShare()" data-i18n="copyText">Copy Text</button>
       </div>
     </div>
   </div>
@@ -507,17 +511,95 @@
 </div>
 
 <footer>
-  <p>Part of the <strong>cc-toolkit</strong> — open-source tools for Claude Code operators.</p>
+  <p data-i18n="footerPart">Part of the <strong>cc-toolkit</strong> — open-source tools for Claude Code operators.</p>
   <div class="toolkit-links">
     <a href="https://github.com/yurukusa/cc-health-check">cc-health-check</a>
     <a href="https://github.com/yurukusa/cc-session-stats">cc-session-stats</a>
     <a href="https://github.com/yurukusa/cc-audit-log">cc-audit-log</a>
     <a href="https://yurukusa.github.io/">yurukusa.github.io</a>
   </div>
-  <p style="margin-top:12px">Zero tracking. Runs entirely in your browser.</p>
+  <p style="margin-top:12px" data-i18n="zeroTracking">Zero tracking. Runs entirely in your browser.</p>
 </footer>
 
 <script>
+// --- i18n (EN / JA) ---
+const I18N = {
+  en: {
+    langBtn: '日本語',
+    tagline: 'Know what your AI costs per commit, per hour, per day.',
+    tabManual: 'Manual Input', tabJson: 'Paste Session Data',
+    yourPlan: 'Your Plan', monthlyCost: 'Monthly cost (USD)', custom: 'Custom', enterCost: 'Enter monthly cost',
+    yourUsage: 'Your Usage', hoursWeek: 'Hours per week using Claude Code', commitsWeek: 'Commits per week',
+    daysWeek: 'Active days per week', sessionsWeek: 'Sessions per week', calcBtn: 'Calculate My AI Costs',
+    jsonHeading: 'Paste cc-session-stats --json Output',
+    jsonNote: 'Run <code style="color:var(--accent)">npx cc-session-stats --json</code> and paste the result below.',
+    jsonCommits: 'Commits per week (estimate)', calcJsonBtn: 'Calculate From Real Data',
+    cpc: 'cost per commit', perHour: 'per hour', perDay: 'per active day', perSession: 'per session',
+    vsAlt: 'vs. Alternatives (Monthly Cost for Same Output)', verdict: 'Verdict',
+    shareHeading: 'Share Your Results', shareX: 'Share on X', copyText: 'Copy Text', copied: 'Copied!',
+    footerPart: 'Part of the <strong>cc-toolkit</strong> — open-source tools for Claude Code operators.',
+    zeroTracking: 'Zero tracking. Runs entirely in your browser.',
+    cmpYou: 'Claude Code (you)', cmpJunior: 'Junior Dev (same hrs)', cmpSenior: 'Senior Dev (same hrs)',
+    insight: (c) => c < 0.5 ? 'Cheaper than a cup of coffee per commit' : c < 2 ? 'About the cost of a vending machine drink' : c < 5 ? 'A latte per commit' : c < 15 ? 'A meal per commit' : 'Consider increasing commit frequency',
+    verdictFn: (d, r) => r > 20 ? { t: 'Extraordinary value.', x: `A junior developer doing the same ${d.monthlyHours.toFixed(0)} hours would cost ${r.toFixed(0)}x more. You're getting developer-level output at a fraction of the cost.` }
+      : r > 10 ? { t: 'Excellent value.', x: `At $${d.costPerHour.toFixed(2)}/hour, you're paying roughly ${r.toFixed(0)}x less than a junior developer. Every commit costs you $${d.costPerCommit.toFixed(2)}.` }
+      : r > 5 ? { t: 'Strong value.', x: `Your AI costs $${d.costPerHour.toFixed(2)}/hour vs $35/hour for a junior dev (${r.toFixed(0)}x less). The more you use it, the better the ROI.` }
+      : r > 2 ? { t: 'Good value, with room to optimize.', x: `You're using ${d.hoursPerWeek} hours/week. Increasing usage would drive down your cost per hour (currently $${d.costPerHour.toFixed(2)}).` }
+      : { t: 'Consider increasing usage.', x: `At ${d.hoursPerWeek} hours/week, your cost per hour is $${d.costPerHour.toFixed(2)}. For maximum ROI, aim for 20+ hours/week of active use.` },
+    shareLines: (d, r) => [`My Claude Code costs:`, `$${d.costPerCommit.toFixed(2)}/commit | $${d.costPerHour.toFixed(2)}/hour | $${d.costPerDay.toFixed(2)}/day`, `${d.monthlyHours.toFixed(0)} hours/month on $${d.monthlyCost}/month plan`, `Junior dev equivalent: $${d.comparisons[4].cost.toFixed(0)}/month (${r.toFixed(0)}x more)`, ``, `Check yours: https://yurukusa.github.io/cc-cost-check/`],
+    funnelTitle: 'Want your plan to last longer?',
+    funnelBody: 'Your cost above is fixed by your monthly plan — the real lever is how much output you get per dollar. Cutting wasted tokens (CLAUDE.md bloat, cache misses, sub-agent fan-out) makes the same plan do roughly twice the work.',
+    funnelCta: 'Token-savings book (¥2,500) →',
+    funnelUrl: 'https://yurukusa.gumroad.com/l/swpeu',
+  },
+  ja: {
+    langBtn: 'EN',
+    tagline: 'Claude Code の費用が、1コミット・1時間・1日あたりいくらかを知る。',
+    tabManual: '手で入力', tabJson: 'セッションのデータを貼る',
+    yourPlan: '契約のプラン', monthlyCost: '月額（米ドル）', custom: 'その他', enterCost: '月額を入力',
+    yourUsage: '使い方', hoursWeek: '週に Claude Code を使う時間', commitsWeek: '週のコミット数',
+    daysWeek: '週の稼働の日数', sessionsWeek: '週のセッション数', calcBtn: '費用を計算する',
+    jsonHeading: 'cc-session-stats --json の出力を貼る',
+    jsonNote: '<code style="color:var(--accent)">npx cc-session-stats --json</code> を実行して、その出力を下に貼ってください。',
+    jsonCommits: '週のコミット数（概算）', calcJsonBtn: '実データから計算する',
+    cpc: '1コミットあたりの費用', perHour: '1時間あたり', perDay: '稼働1日あたり', perSession: '1セッションあたり',
+    vsAlt: '他の選択肢との比較（同じ成果の月額）', verdict: '判定',
+    shareHeading: '結果をシェアする', shareX: 'X でシェア', copyText: 'コピー', copied: 'コピーしました！',
+    footerPart: '<strong>cc-toolkit</strong> の一部 — Claude Code の運用者のためのオープンソースの道具。',
+    zeroTracking: '計測なし。すべてブラウザの中で完結します。',
+    cmpYou: 'Claude Code（あなた）', cmpJunior: 'ジュニアの開発者（同じ時間）', cmpSenior: 'シニアの開発者（同じ時間）',
+    insight: (c) => c < 0.5 ? '1コミットがコーヒー1杯より安い' : c < 2 ? '1コミットが自販機の飲み物くらい' : c < 5 ? '1コミットがカフェラテくらい' : c < 15 ? '1コミットが食事1回くらい' : 'コミットの頻度を上げると下がります',
+    verdictFn: (d, r) => r > 20 ? { t: '並外れた費用対効果。', x: `同じ ${d.monthlyHours.toFixed(0)} 時間をジュニアの開発者がやると ${r.toFixed(0)} 倍の費用がかかります。開発者の水準の成果を、ごく一部の費用で得ています。` }
+      : r > 10 ? { t: '非常に良い費用対効果。', x: `1時間 $${d.costPerHour.toFixed(2)} は、ジュニアの開発者のおよそ ${r.toFixed(0)} 分の1です。1コミットあたり $${d.costPerCommit.toFixed(2)} です。` }
+      : r > 5 ? { t: '良い費用対効果。', x: `あなたの AI は1時間 $${d.costPerHour.toFixed(2)}、ジュニアの開発者の $35/時 の ${r.toFixed(0)} 分の1です。使うほど投資対効果が上がります。` }
+      : r > 2 ? { t: '良好、まだ最適化の余地あり。', x: `週 ${d.hoursPerWeek} 時間の利用です。利用を増やすと、1時間あたりの費用（今 $${d.costPerHour.toFixed(2)}）が下がります。` }
+      : { t: '利用を増やす余地があります。', x: `週 ${d.hoursPerWeek} 時間だと、1時間あたり $${d.costPerHour.toFixed(2)} です。投資対効果を最大にするには、週20時間以上の稼働を目安に。` },
+    shareLines: (d, r) => [`私の Claude Code の費用:`, `$${d.costPerCommit.toFixed(2)}/コミット | $${d.costPerHour.toFixed(2)}/時 | $${d.costPerDay.toFixed(2)}/日`, `月 ${d.monthlyHours.toFixed(0)} 時間・$${d.monthlyCost}/月のプラン`, `ジュニアの開発者の換算: $${d.comparisons[4].cost.toFixed(0)}/月（${r.toFixed(0)} 倍）`, ``, `自分の費用を測る: https://yurukusa.github.io/cc-cost-check/`],
+    funnelTitle: 'プランをもっと長持ちさせたい？',
+    funnelBody: '上の費用は月額のプランで固定です。本当のレバーは、1ドルあたりどれだけの成果を得るか。無駄なトークン（CLAUDE.md の肥大・キャッシュの取りこぼし・サブエージェントの増殖）を削ると、同じプランで約2倍の仕事ができます。',
+    funnelCta: 'トークン節約の本（¥2,500）→',
+    funnelUrl: 'https://yurukusa.booth.pm/items/8230255',
+  },
+};
+let currentLang = 'en';
+function L() { return I18N[currentLang]; }
+function applyLang() {
+  const t = L();
+  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if (t[k] != null) el.textContent = t[k]; });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => { const k = el.getAttribute('data-i18n-html'); if (t[k] != null) el.innerHTML = t[k]; });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { const k = el.getAttribute('data-i18n-ph'); if (t[k] != null) el.placeholder = t[k]; });
+  // footerPart contains HTML
+  const fp = document.querySelector('[data-i18n="footerPart"]'); if (fp) fp.innerHTML = t.footerPart;
+  document.getElementById('lang-btn').textContent = t.langBtn;
+  document.documentElement.lang = currentLang;
+}
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'ja' : 'en';
+  applyLang();
+  if (lastData) renderResults(lastData);
+}
+let lastData = null;
+
 // --- Tab switching ---
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -587,33 +669,24 @@ function doCalculation(monthlyCost, hoursPerWeek, commitsPerWeek, daysPerWeek, s
     hoursPerWeek,
     commitsPerWeek,
     comparisons: [
-      { label: 'Claude Code (you)', cost: monthlyCost, color: 'var(--accent)' },
+      { label: 'Claude Code (you)', key: 'cmpYou', cost: monthlyCost, color: 'var(--accent)' },
       { label: 'GitHub Copilot', cost: copilotMonthly, color: 'var(--blue)' },
       { label: 'ChatGPT Plus', cost: chatgptMonthly, color: 'var(--blue)' },
       { label: 'Cursor Pro', cost: cursorMonthly, color: 'var(--blue)' },
-      { label: 'Junior Dev (same hrs)', cost: juniorEquiv, color: 'var(--gold)' },
-      { label: 'Senior Dev (same hrs)', cost: seniorEquiv, color: 'var(--red)' },
+      { label: 'Junior Dev (same hrs)', key: 'cmpJunior', cost: juniorEquiv, color: 'var(--gold)' },
+      { label: 'Senior Dev (same hrs)', key: 'cmpSenior', cost: seniorEquiv, color: 'var(--red)' },
     ]
   };
 }
 
 function renderResults(data) {
+  lastData = data;
+  const t = L();
   // Hero
   document.getElementById('cpcValue').textContent = '$' + data.costPerCommit.toFixed(2);
 
   // Insight
-  const insight = document.getElementById('cpcInsight');
-  if (data.costPerCommit < 0.5) {
-    insight.textContent = 'Cheaper than a cup of coffee per commit';
-  } else if (data.costPerCommit < 2) {
-    insight.textContent = 'About the cost of a vending machine drink';
-  } else if (data.costPerCommit < 5) {
-    insight.textContent = 'A latte per commit';
-  } else if (data.costPerCommit < 15) {
-    insight.textContent = 'A meal per commit';
-  } else {
-    insight.textContent = 'Consider increasing commit frequency';
-  }
+  document.getElementById('cpcInsight').textContent = t.insight(data.costPerCommit);
 
   // Metrics
   document.getElementById('costHour').textContent = '$' + data.costPerHour.toFixed(2);
@@ -625,9 +698,10 @@ function renderResults(data) {
   const barsHtml = data.comparisons.map(c => {
     const pct = Math.min((c.cost / maxCost) * 100, 100);
     const displayCost = c.cost >= 1000 ? '$' + (c.cost / 1000).toFixed(1) + 'k' : '$' + c.cost.toFixed(0);
+    const label = (c.key && t[c.key]) ? t[c.key] : c.label;
     return `
       <div class="compare-row">
-        <div class="compare-label">${c.label}</div>
+        <div class="compare-label">${label}</div>
         <div class="compare-bar-wrap">
           <div class="compare-bar" style="width:${pct}%;background:${c.color}">${displayCost}/mo</div>
         </div>
@@ -638,36 +712,20 @@ function renderResults(data) {
 
   // Verdict
   const ratio = data.comparisons[4].cost / data.monthlyCost; // junior dev ratio
-  const verdictEl = document.getElementById('verdictText');
-  const detailEl = document.getElementById('verdictDetail');
+  const v = t.verdictFn(data, ratio);
+  document.getElementById('verdictText').textContent = v.t;
+  document.getElementById('verdictDetail').textContent = v.x;
 
-  if (ratio > 20) {
-    verdictEl.textContent = 'Extraordinary value.';
-    detailEl.textContent = `A junior developer doing the same ${data.monthlyHours.toFixed(0)} hours would cost ${ratio.toFixed(0)}x more. You're getting developer-level output at a fraction of the cost.`;
-  } else if (ratio > 10) {
-    verdictEl.textContent = 'Excellent value.';
-    detailEl.textContent = `At $${data.costPerHour.toFixed(2)}/hour, you're paying roughly ${ratio.toFixed(0)}x less than a junior developer. Every commit costs you $${data.costPerCommit.toFixed(2)}.`;
-  } else if (ratio > 5) {
-    verdictEl.textContent = 'Strong value.';
-    detailEl.textContent = `Your AI costs $${data.costPerHour.toFixed(2)}/hour vs $35/hour for a junior dev (${ratio.toFixed(0)}x less). The more you use it, the better the ROI.`;
-  } else if (ratio > 2) {
-    verdictEl.textContent = 'Good value, with room to optimize.';
-    detailEl.textContent = `You're using ${data.hoursPerWeek} hours/week. Increasing usage would drive down your cost per hour (currently $${data.costPerHour.toFixed(2)}).`;
-  } else {
-    verdictEl.textContent = 'Consider increasing usage.';
-    detailEl.textContent = `At ${data.hoursPerWeek} hours/week, your cost per hour is $${data.costPerHour.toFixed(2)}. For maximum ROI, aim for 20+ hours/week of active use.`;
-  }
+  // Token Book funnel
+  document.getElementById('tokenFunnel').innerHTML =
+    '<div style="background:#101a16;border:1px solid var(--accent);border-radius:12px;padding:18px;margin:16px 0;">' +
+      '<div style="font-size:1.0rem;font-weight:800;color:var(--accent);margin-bottom:8px;">' + t.funnelTitle + '</div>' +
+      '<div style="font-size:0.86rem;color:#bbb;margin-bottom:14px;line-height:1.7;">' + t.funnelBody + '</div>' +
+      '<a href="' + t.funnelUrl + '" target="_blank" rel="noopener" style="display:inline-block;background:var(--accent);color:#04130d;padding:9px 20px;border-radius:8px;font-weight:800;text-decoration:none;font-size:0.85rem;">' + t.funnelCta + '</a>' +
+    '</div>';
 
   // Share text
-  const shareText = [
-    `My Claude Code costs:`,
-    `$${data.costPerCommit.toFixed(2)}/commit | $${data.costPerHour.toFixed(2)}/hour | $${data.costPerDay.toFixed(2)}/day`,
-    `${data.monthlyHours.toFixed(0)} hours/month on $${data.monthlyCost}/month plan`,
-    `Junior dev equivalent: $${data.comparisons[4].cost.toFixed(0)}/month (${ratio.toFixed(0)}x more)`,
-    ``,
-    `Check yours: https://yurukusa.github.io/cc-cost-check/`,
-  ].join('\n');
-  document.getElementById('sharePreview').textContent = shareText;
+  document.getElementById('sharePreview').textContent = t.shareLines(data, ratio).join('\n');
 
   // Show results
   document.getElementById('results').classList.add('visible');
@@ -732,7 +790,7 @@ function copyShare() {
   navigator.clipboard.writeText(text).then(() => {
     const btn = event.target;
     const orig = btn.textContent;
-    btn.textContent = 'Copied!';
+    btn.textContent = L().copied;
     setTimeout(() => { btn.textContent = orig; }, 2000);
   });
 }
